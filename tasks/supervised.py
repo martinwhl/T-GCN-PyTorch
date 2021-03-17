@@ -4,16 +4,20 @@ import torch.nn as nn
 import torch.nn.functional as F
 import pytorch_lightning as pl
 import utils.metrics
+import utils.losses
 
 
 class SupervisedForecastTask(pl.LightningModule):
-    def __init__(self, model: nn.Module, pre_len: int = 3, learning_rate: float = 1e-3, 
+    def __init__(self, model: nn.Module, regressor='linear', loss='mse',
+                 pre_len: int = 3, learning_rate: float = 1e-3, 
                  weight_decay: float = 1.5e-3, feat_max_val=1, **kwargs):
         super(SupervisedForecastTask, self).__init__()
         self.save_hyperparameters()
         self.model = model
         self.regressor = nn.Linear(self.model.hyperparameters.get('hidden_dim') or 
-                                   self.model.hyperparameters.get('output_dim'), self.hparams.pre_len)
+                                   self.model.hyperparameters.get('output_dim'), 
+                                   self.hparams.pre_len) if regressor == 'linear' else regressor
+        self._loss = loss
         
     def forward(self, x):
         # (batch_size, seq_len, num_nodes)
@@ -23,10 +27,13 @@ class SupervisedForecastTask(pl.LightningModule):
         # (batch_size * num_nodes, hidden_dim)
         hidden = hidden.reshape((-1, hidden.size(2)))
         # (batch_size * num_nodes, pre_len)
-        predictions = self.regressor(hidden)
+        if self.regressor is not None:
+            predictions = self.regressor(hidden)
+        else:
+            predictions = hidden
         predictions = predictions.reshape((batch_size, num_nodes, -1))
         return predictions
-    
+
     def shared_step(self, batch, batch_idx):
         # (batch_size, seq_len/pre_len, num_nodes)
         x, y = batch
@@ -35,6 +42,13 @@ class SupervisedForecastTask(pl.LightningModule):
         predictions = predictions.transpose(1, 2).reshape((-1, num_nodes))
         y = y.reshape((-1, y.size(2)))
         return predictions, y
+    
+    def loss(self, inputs, targets):
+        if self._loss == 'mse':
+            return F.mse_loss(inputs, targets)
+        if self._loss == 'mse_with_regularizer':
+            return utils.losses.mse_with_regularizer_loss(inputs, targets, self)
+        raise NameError('Loss not supported:', self._loss)
 
     def training_step(self, batch, batch_idx):
         predictions, y = self.shared_step(batch, batch_idx)
@@ -46,7 +60,7 @@ class SupervisedForecastTask(pl.LightningModule):
         predictions, y = self.shared_step(batch, batch_idx)
         predictions = predictions * self.hparams.feat_max_val
         y = y * self.hparams.feat_max_val
-        loss = F.mse_loss(predictions, y)
+        loss = self.loss(predictions, y)
         rmse = torch.sqrt(pl.metrics.functional.mean_squared_error(predictions, y))
         mae = pl.metrics.functional.mean_absolute_error(predictions, y)
         accuracy = utils.metrics.accuracy(predictions, y)
@@ -76,5 +90,6 @@ class SupervisedForecastTask(pl.LightningModule):
         parser = argparse.ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--learning_rate', '--lr', type=float, default=1e-3)
         parser.add_argument('--weight_decay', '--wd', type=float, default=1.5e-3)
+        parser.add_argument('--loss', type=str, default='mse')
         return parser
 

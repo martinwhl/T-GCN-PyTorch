@@ -76,7 +76,7 @@ class TGCNCell(nn.Module):
         c = torch.tanh(self.graph_conv2(inputs, r * hidden_state))
         # h := u * h + (1 - u) * c
         # h (batch_size, num_nodes * num_gru_units)
-        new_hidden_state = u * hidden_state + (1 - u) * c
+        new_hidden_state = u * hidden_state + (1.0 - u) * c
         return new_hidden_state, new_hidden_state
 
     @property
@@ -98,15 +98,12 @@ class TGCN(nn.Module):
     def forward(self, inputs):
         batch_size, seq_len, num_nodes = inputs.shape
         assert self._input_dim == num_nodes
-        outputs = list()
-        hidden_state = torch.zeros(batch_size, num_nodes * self._hidden_dim, 
-                                   dtype=inputs.dtype, device=inputs.device).type_as(inputs)
+        hidden_state = torch.zeros(batch_size, num_nodes * self._hidden_dim).type_as(inputs)
+        output = None
         for i in range(seq_len):
             output, hidden_state = self.tgcn_cell(inputs[:, i, :], hidden_state)
             output = output.reshape((batch_size, num_nodes, self._hidden_dim))
-            outputs.append(output)
-        last_output = outputs[-1]
-        return last_output
+        return output
 
     @staticmethod
     def add_model_specific_arguments(parent_parser):

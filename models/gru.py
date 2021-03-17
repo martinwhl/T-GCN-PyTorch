@@ -84,8 +84,7 @@ class GRU(nn.Module):
         batch_size, seq_len, num_nodes = inputs.shape
         assert self._input_dim == num_nodes
         outputs = list()
-        hidden_state = torch.zeros(batch_size, num_nodes * self._hidden_dim, 
-                                   dtype=inputs.dtype, device=inputs.device).type_as(inputs)
+        hidden_state = torch.zeros(batch_size, num_nodes * self._hidden_dim).type_as(inputs)
         for i in range(seq_len):
             output, hidden_state = self.gru_cell(inputs[:, i, :], hidden_state)
             output = output.reshape((batch_size, num_nodes, self._hidden_dim))
