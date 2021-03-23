@@ -52,7 +52,7 @@ class SupervisedForecastTask(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         predictions, y = self.shared_step(batch, batch_idx)
-        loss = F.mse_loss(predictions, y)
+        loss = self.loss(predictions, y)
         self.log('train_loss', loss)
         return loss
 
