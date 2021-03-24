@@ -2,7 +2,7 @@
 
 This is a PyTorch implementation of T-GCN in the following paper: [T-GCN: A Temporal Graph Convolutional Network for Traffic Prediction](https://arxiv.org/abs/1811.05320). 
 
-A stable version of this repository can be found at [the official repository].(https://github.com/lehaifeng/T-GCN/tree/master/T-GCN/T-GCN-PyTorch)
+A stable version of this repository can be found at [the official repository](https://github.com/lehaifeng/T-GCN/tree/master/T-GCN/T-GCN-PyTorch).
 
 ## Requirements
 
