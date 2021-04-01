@@ -79,6 +79,6 @@ if __name__ == '__main__':
     parser = getattr(tasks, temp_args.settings.capitalize() + 'ForecastTask').add_task_specific_arguments(parser)
 
     args = parser.parse_args()
-    utils.misc.format_logger()
+    utils.misc.format_logger(pl._logger)
 
     main(args)
