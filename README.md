@@ -7,10 +7,11 @@ A stable version of this repository can be found at [the official repository](ht
 ## Requirements
 
 * numpy
-* scipy
+* matplotlib
 * pandas
 * torch
 * pytorch-lightning
+* lightning-bolts
 
 ## Model Training
 
