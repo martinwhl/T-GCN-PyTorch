@@ -92,4 +92,3 @@ class SupervisedForecastTask(pl.LightningModule):
         parser.add_argument('--weight_decay', '--wd', type=float, default=1.5e-3)
         parser.add_argument('--loss', type=str, default='mse')
         return parser
-
