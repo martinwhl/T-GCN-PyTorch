@@ -19,7 +19,7 @@ class SupervisedForecastTask(pl.LightningModule):
                                    self.model.hyperparameters.get('output_dim'), 
                                    self.hparams.pre_len) if regressor == 'linear' else regressor
         self._loss = loss
-        self._feat_max_val = feat_max_val
+        self.feat_max_val = feat_max_val
         
     def forward(self, x):
         # (batch_size, seq_len, num_nodes)
@@ -60,8 +60,8 @@ class SupervisedForecastTask(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         predictions, y = self.shared_step(batch, batch_idx)
-        predictions = predictions * self._feat_max_val
-        y = y * self._feat_max_val
+        predictions = predictions * self.feat_max_val
+        y = y * self.feat_max_val
         loss = self.loss(predictions, y)
         rmse = torch.sqrt(torchmetrics.functional.mean_squared_error(predictions, y))
         mae = torchmetrics.functional.mean_absolute_error(predictions, y)
