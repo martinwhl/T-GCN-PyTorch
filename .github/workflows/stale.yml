@@ -8,9 +8,6 @@ jobs:
   stale:
 
     runs-on: ubuntu-latest
-    permissions:
-      issues: write
-      pull-requests: write
 
     steps:
     - uses: actions/stale@v3
@@ -25,5 +22,4 @@ jobs:
         days-before-issue-stale: 7
         days-before-pr-stale: 15
         days-before-issue-close: 3
-        days-before-pr-close: -1
         days-before-pr-close: -1
