@@ -17,9 +17,7 @@ DATA_PATHS = {
 def get_model(args, dm):
     model = None
     if args.model_name == "GCN":
-        model = models.GCN(
-            adj=dm.adj, input_dim=args.seq_len, output_dim=args.hidden_dim
-        )
+        model = models.GCN(adj=dm.adj, input_dim=args.seq_len, output_dim=args.hidden_dim)
     if args.model_name == "GRU":
         model = models.GRU(input_dim=dm.adj.shape[0], hidden_dim=args.hidden_dim)
     if args.model_name == "TGCN":
@@ -36,12 +34,8 @@ def get_task(args, model, dm):
 
 def get_callbacks(args):
     checkpoint_callback = pl.callbacks.ModelCheckpoint(monitor="train_loss")
-    print_best_epoch_metrics_callback = utils.callbacks.PrintBestEpochMetricsCallback(
-        monitor="train_loss"
-    )
-    plot_validation_predictions_callback = (
-        utils.callbacks.PlotValidationPredictionsCallback(monitor="train_loss")
-    )
+    print_best_epoch_metrics_callback = utils.callbacks.PrintBestEpochMetricsCallback(monitor="train_loss")
+    plot_validation_predictions_callback = utils.callbacks.PlotValidationPredictionsCallback(monitor="train_loss")
     callbacks = [
         checkpoint_callback,
         print_best_epoch_metrics_callback,
@@ -52,9 +46,7 @@ def get_callbacks(args):
 
 def main_supervised(args):
     dm = utils.data.SpatioTemporalCSVDataModule(
-        feat_path=DATA_PATHS[args.data]["feat"],
-        adj_path=DATA_PATHS[args.data]["adj"],
-        **vars(args)
+        feat_path=DATA_PATHS[args.data]["feat"], adj_path=DATA_PATHS[args.data]["adj"], **vars(args)
     )
     model = get_model(args, dm)
     task = get_task(args, model, dm)
@@ -95,11 +87,9 @@ if __name__ == "__main__":
 
     temp_args, _ = parser.parse_known_args()
 
-    # fmt: off
-    parser = getattr(utils.data, temp_args.settings.capitalize() + "DataModule").add_data_specific_arguments(parser) # noqa
+    parser = getattr(utils.data, temp_args.settings.capitalize() + "DataModule").add_data_specific_arguments(parser)
     parser = getattr(models, temp_args.model_name).add_model_specific_arguments(parser)
-    parser = getattr(tasks, temp_args.settings.capitalize() + "ForecastTask").add_task_specific_arguments(parser) # noqa
-    # fmt: on
+    parser = getattr(tasks, temp_args.settings.capitalize() + "ForecastTask").add_task_specific_arguments(parser)
 
     args = parser.parse_args()
     utils.misc.format_logger(pl._logger)
