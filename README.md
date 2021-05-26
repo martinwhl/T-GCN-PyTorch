@@ -16,7 +16,7 @@ Notice that [the original implementation](https://github.com/lehaifeng/T-GCN/tre
 * torch
 * pytorch-lightning>=1.3.0
 * torchmetrics>=0.3.0
-* lightning-bolts
+* python-dotenv
 
 ## Model Training
 
