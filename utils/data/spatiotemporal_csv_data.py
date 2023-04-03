@@ -1,16 +1,20 @@
-import argparse
 import numpy as np
-import pytorch_lightning as pl
+import lightning as L
 from torch.utils.data.dataloader import DataLoader
 import utils.data.functions
 
 
-class SpatioTemporalCSVDataModule(pl.LightningDataModule):
+DATA_PATHS = {
+    "shenzhen": {"feat": "data/sz_speed.csv", "adj": "data/sz_adj.csv"},
+    "losloop": {"feat": "data/los_speed.csv", "adj": "data/los_adj.csv"},
+}
+
+
+class SpatioTemporalCSVDataModule(L.LightningDataModule):
     def __init__(
         self,
-        feat_path: str,
-        adj_path: str,
-        batch_size: int = 64,
+        dataset_name: str,
+        batch_size: int = 32,
         seq_len: int = 12,
         pre_len: int = 3,
         split_ratio: float = 0.8,
@@ -18,8 +22,9 @@ class SpatioTemporalCSVDataModule(pl.LightningDataModule):
         **kwargs
     ):
         super(SpatioTemporalCSVDataModule, self).__init__()
-        self._feat_path = feat_path
-        self._adj_path = adj_path
+        self.dataset_name = dataset_name
+        self._feat_path = DATA_PATHS[self.dataset_name]["feat"]
+        self._adj_path = DATA_PATHS[self.dataset_name]["adj"]
         self.batch_size = batch_size
         self.seq_len = seq_len
         self.pre_len = pre_len
@@ -28,16 +33,6 @@ class SpatioTemporalCSVDataModule(pl.LightningDataModule):
         self._feat = utils.data.functions.load_features(self._feat_path)
         self._feat_max_val = np.max(self._feat)
         self._adj = utils.data.functions.load_adjacency_matrix(self._adj_path)
-
-    @staticmethod
-    def add_data_specific_arguments(parent_parser):
-        parser = argparse.ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument("--batch_size", type=int, default=32)
-        parser.add_argument("--seq_len", type=int, default=12)
-        parser.add_argument("--pre_len", type=int, default=3)
-        parser.add_argument("--split_ratio", type=float, default=0.8)
-        parser.add_argument("--normalize", type=bool, default=True)
-        return parser
 
     def setup(self, stage: str = None):
         self.train_dataset, self.val_dataset = utils.data.functions.generate_torch_datasets(
@@ -61,3 +56,7 @@ class SpatioTemporalCSVDataModule(pl.LightningDataModule):
     @property
     def adj(self):
         return self._adj
+
+    @property
+    def num_nodes(self):
+        return self._adj.shape[0]

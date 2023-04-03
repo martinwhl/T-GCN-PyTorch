@@ -1,32 +1,30 @@
-import argparse
 import torch.optim
 import torch.nn as nn
 import torch.nn.functional as F
-import pytorch_lightning as pl
+import lightning as L
 import torchmetrics
 import utils.metrics
 import utils.losses
 
 
-class SupervisedForecastTask(pl.LightningModule):
+class SupervisedForecastTask(L.LightningModule):
     def __init__(
         self,
         model: nn.Module,
         regressor="linear",
-        loss="mse",
+        loss="mse_with_regularizer",
         pre_len: int = 3,
         learning_rate: float = 1e-3,
-        weight_decay: float = 1.5e-3,
+        weight_decay: float = 0.0,
         feat_max_val: float = 1.0,
         **kwargs
     ):
         super(SupervisedForecastTask, self).__init__()
-        self.save_hyperparameters()
+        self.save_hyperparameters(ignore=["model"])
         self.model = model
         self.regressor = (
             nn.Linear(
-                self.model.hyperparameters.get("hidden_dim")
-                or self.model.hyperparameters.get("output_dim"),
+                self.model.hyperparameters.get("hidden_dim") or self.model.hyperparameters.get("output_dim"),
                 self.hparams.pre_len,
             )
             if regressor == "linear"
@@ -102,11 +100,3 @@ class SupervisedForecastTask(pl.LightningModule):
             lr=self.hparams.learning_rate,
             weight_decay=self.hparams.weight_decay,
         )
-
-    @staticmethod
-    def add_task_specific_arguments(parent_parser):
-        parser = argparse.ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument("--learning_rate", "--lr", type=float, default=1e-3)
-        parser.add_argument("--weight_decay", "--wd", type=float, default=1.5e-3)
-        parser.add_argument("--loss", type=str, default="mse")
-        return parser

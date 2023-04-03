@@ -1,8 +1,8 @@
 import copy
 import numpy as np
 import torch
-from pytorch_lightning.utilities import rank_zero_warn
-from pytorch_lightning.callbacks import Callback
+from lightning.pytorch.utilities.rank_zero import rank_zero_warn
+from lightning.pytorch.callbacks import Callback
 
 
 class BestEpochCallback(Callback):

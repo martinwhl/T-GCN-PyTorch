@@ -14,21 +14,35 @@ Note that [the original implementation](https://github.com/lehaifeng/T-GCN/tree/
 * matplotlib
 * pandas
 * torch
-* pytorch-lightning>=1.3.0
-* torchmetrics>=0.3.0
-* python-dotenv
+* lightning>=2.0
+* torchmetrics>=0.11
+
+⚠️ The repository is currently based on Lightning 2.0. To use PyTorch Lightning v1.x, please switch to the `pl_v1` branch.
 
 ## Model Training
 
-```bash
-# GCN
-python main.py --model_name GCN --max_epochs 3000 --learning_rate 0.001 --weight_decay 0 --batch_size 64 --hidden_dim 100 --settings supervised --gpus 1
-# GRU
-python main.py --model_name GRU --max_epochs 3000 --learning_rate 0.001 --weight_decay 1.5e-3 --batch_size 64 --hidden_dim 100 --settings supervised --gpus 1
-# T-GCN
-python main.py --model_name TGCN --max_epochs 3000 --learning_rate 0.001 --weight_decay 0 --batch_size 32 --hidden_dim 64 --loss mse_with_regularizer --settings supervised --gpus 1
-```
+* CLI
 
-You can also adjust the `--data`, `--seq_len` and `--pre_len` parameters.
+    ```bash
+    # GCN
+    python main.py fit --trainer.max_epochs 3000 --trainer.accelerator cuda --trainer.devices 1 --data.dataset_name losloop --data.batch_size 64 --data.seq_len 12 --data.pre_len 3 --model.model.class_path models.GCN --model.learning_rate 0.001 --model.weight_decay 0 --model.loss mse --model.model.init_args.hidden_dim 100
+    # GRU
+    python main.py fit --trainer.max_epochs 3000 --trainer.accelerator cuda --trainer.devices 1 --data.dataset_name losloop --data.batch_size 64 --data.seq_len 12 --data.pre_len 3 --model.model.class_path models.GRU --model.learning_rate 0.001 --model.weight_decay 1.5e-3 --model.loss mse --model.model.init_args.hidden_dim 100
+    # T-GCN
+    python main.py fit --trainer.max_epochs 1500 --trainer.accelerator cuda --trainer.devices 1 --data.dataset_name losloop --data.batch_size 32 --data.seq_len 12 --data.pre_len 3 --model.model.class_path models.TGCN --model.learning_rate 0.001 --model.weight_decay 0 --model.loss mse_with_regularizer --model.model.init_args.hidden_dim 64
+    ```
+
+* YAML config file
+
+    ```bash
+    # GCN
+    python main.py fit --config configs/gcn.yaml
+    # GRU
+    python main.py fit --config configs/gru.yaml
+    # T-GCN
+    python main.py fit --config configs/tgcn.yaml
+    ```
+
+Please refer to `python main.py fit -h` for more CLI arguments.
 
 Run `tensorboard --logdir ./lightning_logs` to monitor the training progress and view the prediction results.

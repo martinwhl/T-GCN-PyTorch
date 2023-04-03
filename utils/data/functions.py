@@ -15,9 +15,7 @@ def load_adjacency_matrix(adj_path, dtype=np.float32):
     return adj
 
 
-def generate_dataset(
-    data, seq_len, pre_len, time_len=None, split_ratio=0.8, normalize=True
-):
+def generate_dataset(data, seq_len, pre_len, time_len=None, split_ratio=0.8, normalize=True):
     """
     :param data: feature matrix
     :param seq_len: length of the train data sequence
@@ -45,9 +43,7 @@ def generate_dataset(
     return np.array(train_X), np.array(train_Y), np.array(test_X), np.array(test_Y)
 
 
-def generate_torch_datasets(
-    data, seq_len, pre_len, time_len=None, split_ratio=0.8, normalize=True
-):
+def generate_torch_datasets(data, seq_len, pre_len, time_len=None, split_ratio=0.8, normalize=True):
     train_X, train_Y, test_X, test_Y = generate_dataset(
         data,
         seq_len,
@@ -56,10 +52,6 @@ def generate_torch_datasets(
         split_ratio=split_ratio,
         normalize=normalize,
     )
-    train_dataset = torch.utils.data.TensorDataset(
-        torch.FloatTensor(train_X), torch.FloatTensor(train_Y)
-    )
-    test_dataset = torch.utils.data.TensorDataset(
-        torch.FloatTensor(test_X), torch.FloatTensor(test_Y)
-    )
+    train_dataset = torch.utils.data.TensorDataset(torch.FloatTensor(train_X), torch.FloatTensor(train_Y))
+    test_dataset = torch.utils.data.TensorDataset(torch.FloatTensor(test_X), torch.FloatTensor(test_Y))
     return train_dataset, test_dataset

@@ -1,3 +1,2 @@
-from utils.callbacks.plot_validation_predictions import (
-    PlotValidationPredictionsCallback,
-)
+from utils.callbacks.plot_validation_predictions import PlotValidationPredictions
+from utils.callbacks.print_last_epoch_val_metrics import PrintLastEpochValMetrics

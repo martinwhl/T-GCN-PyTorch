@@ -1,4 +1,3 @@
-import argparse
 import torch
 import torch.nn as nn
 
@@ -9,9 +8,7 @@ class GRULinear(nn.Module):
         self._num_gru_units = num_gru_units
         self._output_dim = output_dim
         self._bias_init_value = bias
-        self.weights = nn.Parameter(
-            torch.FloatTensor(self._num_gru_units + 1, self._output_dim)
-        )
+        self.weights = nn.Parameter(torch.FloatTensor(self._num_gru_units + 1, self._output_dim))
         self.biases = nn.Parameter(torch.FloatTensor(self._output_dim))
         self.reset_parameters()
 
@@ -24,9 +21,7 @@ class GRULinear(nn.Module):
         # inputs (batch_size, num_nodes, 1)
         inputs = inputs.reshape((batch_size, num_nodes, 1))
         # hidden_state (batch_size, num_nodes, num_gru_units)
-        hidden_state = hidden_state.reshape(
-            (batch_size, num_nodes, self._num_gru_units)
-        )
+        hidden_state = hidden_state.reshape((batch_size, num_nodes, self._num_gru_units))
         # [inputs, hidden_state] "[x, h]" (batch_size, num_nodes, num_gru_units + 1)
         concatenation = torch.cat((inputs, hidden_state), dim=2)
         # [x, h] (batch_size * num_nodes, gru_units + 1)
@@ -76,9 +71,9 @@ class GRUCell(nn.Module):
 
 
 class GRU(nn.Module):
-    def __init__(self, input_dim: int, hidden_dim: int, **kwargs):
+    def __init__(self, num_nodes: int, hidden_dim: int = 64, **kwargs):
         super(GRU, self).__init__()
-        self._input_dim = input_dim  # num_nodes for prediction
+        self._input_dim = num_nodes
         self._hidden_dim = hidden_dim
         self.gru_cell = GRUCell(self._input_dim, self._hidden_dim)
 
@@ -86,21 +81,13 @@ class GRU(nn.Module):
         batch_size, seq_len, num_nodes = inputs.shape
         assert self._input_dim == num_nodes
         outputs = list()
-        hidden_state = torch.zeros(batch_size, num_nodes * self._hidden_dim).type_as(
-            inputs
-        )
+        hidden_state = torch.zeros(batch_size, num_nodes * self._hidden_dim).type_as(inputs)
         for i in range(seq_len):
             output, hidden_state = self.gru_cell(inputs[:, i, :], hidden_state)
             output = output.reshape((batch_size, num_nodes, self._hidden_dim))
             outputs.append(output)
         last_output = outputs[-1]
         return last_output
-
-    @staticmethod
-    def add_model_specific_arguments(parent_parser):
-        parser = argparse.ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument("--hidden_dim", type=int, default=64)
-        return parser
 
     @property
     def hyperparameters(self):

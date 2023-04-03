@@ -1,21 +1,16 @@
-import argparse
 import torch
 import torch.nn as nn
 from utils.graph_conv import calculate_laplacian_with_self_loop
 
 
 class GCN(nn.Module):
-    def __init__(self, adj, input_dim: int, output_dim: int, **kwargs):
+    def __init__(self, adj, seq_len: int, hidden_dim: int = 64, **kwargs):
         super(GCN, self).__init__()
-        self.register_buffer(
-            "laplacian", calculate_laplacian_with_self_loop(torch.FloatTensor(adj))
-        )
+        self.register_buffer("laplacian", calculate_laplacian_with_self_loop(torch.FloatTensor(adj)))
         self._num_nodes = adj.shape[0]
-        self._input_dim = input_dim  # seq_len for prediction
-        self._output_dim = output_dim  # hidden_dim for prediction
-        self.weights = nn.Parameter(
-            torch.FloatTensor(self._input_dim, self._output_dim)
-        )
+        self._input_dim = seq_len  # seq_len for prediction
+        self._output_dim = hidden_dim  # hidden_dim for prediction
+        self.weights = nn.Parameter(torch.FloatTensor(self._input_dim, self._output_dim))
         self.reset_parameters()
 
     def reset_parameters(self):
@@ -41,12 +36,6 @@ class GCN(nn.Module):
         # (batch_size, num_nodes, output_dim)
         outputs = outputs.transpose(0, 1)
         return outputs
-
-    @staticmethod
-    def add_model_specific_arguments(parent_parser):
-        parser = argparse.ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument("--hidden_dim", type=int, default=64)
-        return parser
 
     @property
     def hyperparameters(self):
