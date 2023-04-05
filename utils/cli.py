@@ -3,7 +3,7 @@ from lightning.pytorch.callbacks import RichModelSummary, RichProgressBar
 from lightning.pytorch.cli import LightningCLI
 from lightning.pytorch.utilities.rank_zero import rank_zero_info
 import utils.logging
-from utils.callbacks import PrintLastEpochValMetrics
+from utils.callbacks import PrintLastEpochValMetrics, SaveLastEpochValResults
 
 
 class CustomLightningCLI(LightningCLI):
@@ -23,6 +23,7 @@ class CustomLightningCLI(LightningCLI):
         parser.add_lightning_class_args(RichModelSummary, "callbacks.rich_model_summary")
         parser.add_lightning_class_args(RichProgressBar, "callbacks.rich_progress_bar")
         parser.add_lightning_class_args(PrintLastEpochValMetrics, "callbacks.print_last_epoch_val_metrics")
+        parser.add_lightning_class_args(SaveLastEpochValResults, "callbacks.save_last_epoch_val_results")
 
     def before_fit(self):
         log_path = self.config.get("fit").get("log_path")

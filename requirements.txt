@@ -1,5 +1,4 @@
 numpy
-matplotlib
 pandas
 torch
 lightning>=2.0

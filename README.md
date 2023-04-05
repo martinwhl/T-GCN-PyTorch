@@ -11,7 +11,6 @@ Note that [the original implementation](https://github.com/lehaifeng/T-GCN/tree/
 ## Requirements
 
 * numpy
-* matplotlib
 * pandas
 * torch
 * lightning>=2.0
