@@ -25,7 +25,7 @@ class CustomLightningCLI(LightningCLI):
         parser.add_lightning_class_args(PrintLastEpochValMetrics, "callbacks.print_last_epoch_val_metrics")
         parser.add_lightning_class_args(SaveLastEpochValResults, "callbacks.save_last_epoch_val_results")
 
-    def before_fit(self):
+    def before_instantiate_classes(self):
         log_path = self.config.get("fit").get("log_path")
         if log_path is not None:
             utils.logging.output_logger_to_file(L.pytorch._logger, log_path)
