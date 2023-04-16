@@ -1,4 +1,5 @@
 import lightning as L
+import models  # noqa: F401
 import utils.logging
 from tasks import SupervisedForecastTask
 from utils.data import SpatioTemporalCSVDataModule
